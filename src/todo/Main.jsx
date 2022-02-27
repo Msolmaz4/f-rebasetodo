@@ -1,45 +1,75 @@
-import React, { useState } from 'react'
+import React, { useState ,useEffect} from "react";
+import{ Button ,TextField }from '@mui/material';
+import Todo from "./Todo";
+import DeleteIcon from '@mui/icons-material/Delete';
+import db from '../auth/firebase'
+import { collection,getDocs ,getDoc} from 'firebase/firestore'
+
+const Main = () => {
+  const [input, setInput] = useState('');
+  const [load, setLoad] = useState([]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoad([...load, { input }]);
+    setInput('')
+  };
+
+const getTodos = async (db)=>{
+let todos=[]
+  const collRef = collection( db,'todos');
+  const todoScnapp = await getDocs(collRef)
+ // console.log(todoScnapp)
+  todoScnapp.docs.forEach(doc=>{
+    todos.push({...doc.data(),id:doc.id})
+  })
+  console.log('gero',todos)
+  setLoad(todos)
+}
 
 
-const Main =()=>{
 
 
-    const [input ,setInput] =useState()
-    const [ load,setLoad] = useState([])
+  useEffect(()=>{
+    getTodos(db)
+  },[])
 
- const handleSubmit =(e)=>{
-        e.preventDefault()
-        setLoad([...load,{input}])
- }
+ 
+
+  return (
+    <div>
 
 
-    return (
-
-       
-
+      <form onSubmit={handleSubmit}>
+        <h1>TODo lIST</h1>
+        <TextField id="outlined-basic" 
+        value={input} onChange={(e) => setInput(e.target.value)}
+        />
+        
+        <Button  onClick={handleSubmit}   variant="contained">ADD TO</Button>
         
         
-        <div>
-            <form onSubmit={handleSubmit}>
-       <h1>TODo lIST</h1> 
-       <input
-       value={input}
-       onChange={(e)=>setInput(e.target.value)}
-       
-       />
-       <button> button
-
-
-
-       </button>
-{
-    load.map((e)=>(
-        <h1>{e.input}</h1>
+  
+      {load.map((e) => (
+      <div className="map">
+          <ul>
+          <li>
+        <h1 className="map">{e.todo}
+        <DeleteIcon  className="delete"/>
+        </h1>
+        </li>
+        </ul>
+      </div>
     ))
-}
-       </form>
-        
-        </div>)
-}
+
+    
+
+  }
+
+
+      </form>
+    </div>
+  );
+};
 
 export default Main;
