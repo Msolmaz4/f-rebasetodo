@@ -3,7 +3,7 @@ import{ Button ,TextField }from '@mui/material';
 import Todo from "./Todo";
 import DeleteIcon from '@mui/icons-material/Delete';
 import db from '../auth/firebase'
-import { collection,getDocs ,getDoc} from 'firebase/firestore'
+import { collection,getDocs ,addDoc,deleteDoc,doc} from 'firebase/firestore'
 
 const Main = () => {
   const [input, setInput] = useState('');
@@ -11,9 +11,28 @@ const Main = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoad([...load, { input }]);
+    //setLoad([...load, { input }]);
+    const collRef = collection( db,'todos');
+    addDoc(collRef,{todo:input})
+    .then(res=>{
+     // console.log('res',res)
+     setLoad([...load,{todo:input , id:res.id}])
+    })
+    
     setInput('')
+    
   };
+  
+  const deleteItem=(id)=>{
+    const docRef = doc(db,'todos')
+    deleteDoc(docRef)
+    .then(()=>{
+      let filterLoad = load.filter(todo => todo.id !=id)
+      console.log('filterLoad',filterLoad)
+      setLoad(filterLoad)
+    })
+  }
+
 
 const getTodos = async (db)=>{
 let todos=[]
@@ -55,7 +74,11 @@ let todos=[]
           <ul>
           <li>
         <h1 className="map">{e.todo}
-        <DeleteIcon  className="delete"/>
+        <button
+        
+         onClick={()=>deleteItem(id)}
+         className="delete"
+         > delete</button>
         </h1>
         </li>
         </ul>
